@@ -1,0 +1,6 @@
+name: MythicDrop
+version: 1.0.0
+author: Elias
+main: me.afelia.mythicdrop.MythicDrop
+api-version: '1.20'
+load: STARTUP
