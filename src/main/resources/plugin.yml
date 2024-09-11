@@ -1,0 +1,4 @@
+name: MythicDrop
+version: '2.0-SNAPSHOT'
+main: fr.elias.mythicDrop.MythicDrop
+api-version: '1.21'
