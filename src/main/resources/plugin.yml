@@ -1,12 +1,21 @@
 name: MythicDrop
-<<<<<<< HEAD
-version: '2.0-SNAPSHOT'
-main: fr.elias.mythicDrop.MythicDrop
-api-version: '1.21'
-=======
-version: 1.0.0
-author: Elias
-main: me.afelia.mythicdrop.MythicDrop
+version: '2.6-SNAPSHOT'
+main: fr.elias.mythicdrop.MythicDrop
 api-version: '1.20'
+author: Elias
+depend: [MythicMobs]
+softdepend: [LuckPerms]
 load: STARTUP
->>>>>>> b74e8ff307efcf592f905cc1ffc8c6c41c21e67c
+# Commands for the plugin
+commands:
+  mythicdrop:
+    description: "Base command for MythicDrop plugin"
+    usage: "/mythicdrop reload"
+    permission: mythicdrop.reload
+    permission-message: "You do not have permission to execute this command."
+
+# Permissions for the plugin
+permissions:
+  mythicdrop.reload:
+    description: "Allows reloading the MythicDrop configuration"
+    default: op
