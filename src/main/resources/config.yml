@@ -1,119 +1,71 @@
-alienspider-black:
+# Reward processing options
+reward-processing:
+  most-damage: false   # If true, the player who dealt the most damage will receive the reward
+  # If false, the player who delivers the last hit will receive the reward
+#If you set most-damage to true, you have to modify the mythicmobs mob config and add the "ThreatTable: true" option here is an example:
+#BigScaryBoss:
+#  Type: zombie
+#  Display: '&6Zombie'
+#  Health: 20000
+#  Modules:
+#    ThreatTable: true
+# Configuration for different mobs and their drops
+Skeleton-king:
   drops:
-<<<<<<< HEAD
     default:
       drop1:
         command: "give %player% diamond 1"
         chance: 0.5
-        message: "&b&lYou got a diamond" # Custom message supporting color codes
+        message: "&b&lYou got a diamond from the Skeleton King!" # Custom message supporting color codes
       drop2:
         command: "give %player% iron_sword 1"
         chance: 0.3
-        message: "&e&lYou got an iron sword" # Custom message supporting color codes
+        message: "&e&lYou got an iron sword from the Skeleton King!"
       drop3:
         command: "money give %player% 100"
         chance: 0.2
-        message: "&a&lYou got 100 money" # Custom message supporting color codes
+        message: "&a&lYou received 100 money for defeating the Skeleton King!"
     vip:
       drop1:
         command: "give %player% diamond 2"
         chance: 0.6
-        message: "&b&lVIP! You got 2 diamonds" # Increased rewards for VIP
+        message: "&b&lVIP! You got 2 diamonds from the Skeleton King!" # VIP reward message
       drop2:
         command: "give %player% iron_sword 1"
         chance: 0.4
-        message: "&e&lVIP! You got an iron sword" # Custom message for VIP
+        message: "&e&lVIP! You got an iron sword from the Skeleton King!"
       drop3:
         command: "money give %player% 200"
         chance: 0.3
-        message: "&a&lVIP! You got 200 money" # Custom message for VIP
+        message: "&a&lVIP! You received 200 money for defeating the Skeleton King!"
 
-custom_zombie:
+Zombie-lord:
   drops:
     default:
       drop1:
-        command: "give %player% gold_ingot 1"
-        chance: 0.3
-        message: "&6&lYou got a gold ingot" # Custom message supporting color codes
+        command: "give %player% emerald 1"
+        chance: 0.4
+        message: "&2&lYou got an emerald from the Zombie Lord!"
       drop2:
-        command: "give %player% iron_sword 1"
-        chance: 0.2
-        message: "&7&lYou got an iron sword" # Custom message supporting color codes
+        command: "give %player% iron_helmet 1"
+        chance: 0.25
+        message: "&6&lYou got an iron helmet from the Zombie Lord!"
       drop3:
-        command: "give %player% diamond_sword 1"
+        command: "money give %player% 150"
         chance: 0.1
-        message: "&b&lYou got a diamond sword" # Custom message supporting color codes
+        message: "&a&lYou received 150 money for defeating the Zombie Lord!"
     vip:
       drop1:
-        command: "give %player% gold_ingot 2"
-        chance: 0.5
-        message: "&6&lVIP! You got 2 gold ingots" # Better rewards for VIP
+        command: "give %player% emerald 2"
+        chance: 0.6
+        message: "&2&lVIP! You got 2 emeralds from the Zombie Lord!"
       drop2:
-        command: "give %player% diamond_sword 1"
-        chance: 0.4
-        message: "&b&lVIP! You got a diamond sword" # Custom message for VIP
-      drop3:
-        command: "money give %player% 1000"
-        chance: 0.2
-        message: "&a&lVIP! You got 1000 money" # Custom message for VIP
-
-another_custom_mob:
-  drops:
-    default:
-      drop1:
-        command: "give %player% potion_of_regeneration 1"
-        chance: 0.2
-        message: "&d&lYou got a potion of regeneration" # Custom message supporting color codes
-      drop2:
-        command: "money give %player% 500"
-        chance: 0.4
-        message: "&a&lYou got 500 money" # Custom message supporting color codes
-    vip:
-      drop1:
-        command: "give %player% potion_of_regeneration 2"
+        command: "give %player% iron_chestplate 1"
         chance: 0.3
-        message: "&d&lVIP! You got 2 potions of regeneration" # Increased rewards for VIP
-      drop2:
-        command: "money give %player% 1000"
-        chance: 0.5
-        message: "&a&lVIP! You got 1000 money" # Increased money for VIP
-=======
-    drop1:
-      command: "give %player% diamond 1"
-      chance: 0.5
-      message: "&b&lYou got a diamond sword" # custom message supporting color codes
-    drop2:
-      command: "give %player% iron_sword 1"
-      chance: 0.3
-      message: "&e&lYou got an iron sword" # custom message supporting color codes
-    drop3:
-      command: "money give %player% 100"
-      chance: 0.2
-      message: "&a&lYou got 100 money" # custom message supporting color codes
+        message: "&6&lVIP! You got an iron chestplate from the Zombie Lord!"
+      drop3:
+        command: "money give %player% 300"
+        chance: 0.25
+        message: "&a&lVIP! You received 300 money for defeating the Zombie Lord!"
 
-custom_zombie:
-  drops:
-    drop1:
-      command: "give %player% gold_ingot 1"
-      chance: 0.3
-      message: "&6&lYou got a gold ingot" # custom message supporting color codes
-    drop2:
-      command: "give %player% iron_sword 1"
-      chance: 0.2
-      message: "&7&lYou got an iron sword" # custom message supporting color codes
-    drop3:
-      command: "give %player% diamond_sword 1"
-      chance: 0.1
-      message: "&b&lYou got a diamond sword" # custom message supporting color codes
 
-another_custom_mob:
-  drops:
-    drop1:
-      command: "iagive %player% potion_of_regeneration 1"
-      chance: 0.2
-      message: "&d&lYou got a potion of regeneration" # custom message supporting color codes
-    drop2:
-      command: "money give %player% 500"
-      chance: 0.4
-      message: "&a&lYou got 500 money" # custom message supporting color codes
->>>>>>> b74e8ff307efcf592f905cc1ffc8c6c41c21e67c
