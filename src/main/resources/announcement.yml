@@ -1,6 +1,15 @@
-announce-on-death: true
+announce-on-death: true # Set to true to announce the most damage dealt to all mythicmobs mob on death
 
-messages:
-  header: "&aLIST OF PLAYERS WHO HAVE INFLICTED THE MOST DAMAGE ON %BOSSNAME%:"
-  entry: "&e%position%. %player% - %damage% DAMAGE"
-  no-players: "&cNo players contributed damage to the mob."
+messages: # Messages for the most damage dealt to a mob fully customizable with color codes
+  header: "&aLIST OF PLAYERS WHO HAVE INFLICTED THE MOST DAMAGE ON %BOSSNAME%:" # Use %BOSSNAME% to display the name of the mob
+  entry: "&e%position%. %player% - %damage% DAMAGE" # Use %position% to display the player's rank, %player% to display the player's name, and %damage% to display the damage dealt
+  no-players: "&cNo players contributed damage to the mob." # Message displayed when no player contributed damage to the mob
+
+announce-specific-mob: #in this section you can specify which mobs you want to announce the most damage for
+#If announce-on-death is set to true, and one mob here is set to false, the most damage dealt to that mob will not be announced
+#If announce-on-death is set to false and one mob here is set to true, the most damage dealt to that mob will be announced
+  SkeletonKing: true # Set to true to announce the most damage dealt to this mob on death
+  SkeletonKnight: false # Set to false to not announce the most damage dealt to this mob on death
+  SkeletonLord: true
+  SkeletonWarrior: false
+  Giant: true
