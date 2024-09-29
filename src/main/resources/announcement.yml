@@ -1,0 +1,6 @@
+announce-on-death: true
+
+messages:
+  header: "&aLIST OF PLAYERS WHO HAVE INFLICTED THE MOST DAMAGE ON %BOSSNAME%:"
+  entry: "&e%position%. %player% - %damage% DAMAGE"
+  no-players: "&cNo players contributed damage to the mob."
