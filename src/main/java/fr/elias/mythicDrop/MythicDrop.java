@@ -24,12 +24,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import org.bukkit.command.TabCompleter;
 
 public class MythicDrop extends JavaPlugin implements Listener {
     private FileConfiguration config;
@@ -37,6 +34,7 @@ public class MythicDrop extends JavaPlugin implements Listener {
     private FileConfiguration debugConfig;
     private final Random random = new Random();
     private LuckPerms luckPerms;
+
 
     @Override
     public void onEnable() {
@@ -50,6 +48,10 @@ public class MythicDrop extends JavaPlugin implements Listener {
 
         // Register event listener
         Bukkit.getPluginManager().registerEvents(this, this);
+
+        // Register the command and tab completer
+        Objects.requireNonNull(this.getCommand("mythicdrop")).setExecutor(this);
+        Objects.requireNonNull(this.getCommand("mythicdrop")).setTabCompleter(this);  // Register the TabCompleter here
 
         // Ensure MythicMobs is loaded before interacting with it
         if (Bukkit.getPluginManager().getPlugin("MythicMobs") != null) {
@@ -69,25 +71,46 @@ public class MythicDrop extends JavaPlugin implements Listener {
         }
     }
 
+
     @Override
     public void onDisable() {
         // Clean up resources if needed
     }
 
-    // Reload Command
+
+// Reload Command
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, String label, @NotNull String[] args) {
         if (label.equalsIgnoreCase("mythicdrop") && args.length > 0 && args[0].equalsIgnoreCase("reload")) {
+            // Reload main configuration file
             this.reloadConfig();
             this.config = this.getConfig();
+
+            // Reload custom configuration files
             loadAnnouncementConfig();
             loadDebugConfig();
+
+            // Notify the sender that the configurations have been reloaded
             sender.sendMessage(ChatColor.GREEN + "MythicDrop configuration reloaded.");
             return true;
         }
         return false;
     }
 
+    @Override
+    public List<String> onTabComplete(@NotNull CommandSender sender, Command command, @NotNull String alias, @NotNull String[] args) {
+        if (command.getName().equalsIgnoreCase("mythicdrop")) {
+            // If no arguments or one argument, suggest "reload"
+            if (args.length == 1) {
+                List<String> subcommands = new ArrayList<>();
+                subcommands.add("reload");
+                return subcommands.stream()
+                        .filter(subcommand -> subcommand.toLowerCase().startsWith(args[0].toLowerCase()))
+                        .collect(Collectors.toList());
+            }
+        }
+        return null;
+    }
     // Handle mob death and reward the most damage dealer or last hitter based on config
     @EventHandler
     public void onMythicMobDeath(MythicMobDeathEvent event) {
@@ -105,17 +128,27 @@ public class MythicDrop extends JavaPlugin implements Listener {
                 AbstractEntity topThreatHolder = activeMob.getThreatTable().getTopThreatHolder();
 
                 // Check if the top threat holder is a player
-                if (topThreatHolder.isPlayer()) {
-                    AbstractPlayer abstractPlayer = topThreatHolder.asPlayer();
-                    rewardPlayer = (Player) abstractPlayer.getBukkitEntity(); // Cast to Bukkit Player
-                    logDebug("Most-damage player: " + rewardPlayer.getName());
+                if (topThreatHolder != null) { // Check if topThreatHolder is not null
+                    if (topThreatHolder.isPlayer()) {
+                        AbstractPlayer abstractPlayer = topThreatHolder.asPlayer();
+                        rewardPlayer = (Player) abstractPlayer.getBukkitEntity(); // Cast to Bukkit Player
+                        logDebug("Most-damage player: " + rewardPlayer.getName());
+                    } else {
+                        logDebug("No player found with top threat.");
+                    }
                 } else {
-                    logDebug("No player found with top threat.");
+                    logDebug("Top threat holder is null."); // Log if topThreatHolder is null
                 }
 
-                // Check if announcements are enabled in the config
-                if (announcementConfig.getBoolean("announce-on-death", true)) {
+                // Check if announcements are globally enabled or enabled for this specific mob
+                String mobName = activeMob.getType().getInternalName();
+                boolean globalAnnounce = announcementConfig.getBoolean("announce-on-death", true);
+                boolean specificMobAnnounce = announcementConfig.getBoolean("announce-specific-mob." + mobName, globalAnnounce);
+
+                if (specificMobAnnounce) {
                     announceDamageRanking(activeMob);
+                } else {
+                    logDebug("Announcements disabled for mob: " + mobName);
                 }
             }
         } else {
@@ -142,7 +175,7 @@ public class MythicDrop extends JavaPlugin implements Listener {
 
                 // If the group is not found in the configuration, default to the "default" group
                 final ConfigurationSection groupDrops;
-                if (mobDrops.contains(primaryGroup)) {
+                if (Objects.requireNonNull(mobDrops).contains(primaryGroup)) {
                     groupDrops = mobDrops.getConfigurationSection(primaryGroup);
                     logDebug("Group-specific drops found for: " + primaryGroup);
                 } else {
@@ -181,6 +214,7 @@ public class MythicDrop extends JavaPlugin implements Listener {
             }
         }
     }
+
 
 
     /**
@@ -237,7 +271,7 @@ public class MythicDrop extends JavaPlugin implements Listener {
         if (user != null) {
             String primaryGroup = user.getPrimaryGroup();
             logDebug("Fetched primary group for player: " + player.getName() + " - " + primaryGroup);
-            return primaryGroup != null ? primaryGroup : "default";
+            return primaryGroup;
         }
         logDebug("No LuckPerms user found for player: " + player.getName() + ". Using default group.");
         return "default";
