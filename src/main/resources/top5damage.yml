@@ -1,0 +1,55 @@
+# Top 5 Damage Configuration
+rewardtop5:
+  - SkeletonKing
+
+SkeletonKing:
+  guaranteed-rewards: 1 # Limit rewards to 1 from the list
+  use-standard-rewards: false
+  first-place:
+    default:
+      drop1:
+        command: "give %player% diamond 5"
+        chance: 1.0
+        message: "&aYou are the top damager! Enjoy your diamonds!"
+    VIP:
+      drop1:
+        command: "give %player% nether_star 1"
+        chance: 1.0
+        message: "&bVIP Bonus: Nether Star for being the top damager!"
+  second-place:
+    default:
+      drop1:
+        command: "give %player% emerald 10"
+        chance: 0.8
+        message: "&aSecond place! Here's 10 emeralds."
+  third-place:
+    default:
+      drop1:
+        command: "give %player% gold_ingot 15"
+        chance: 0.6
+        message: "&aThird place! Here's some gold."
+  fourth-place:
+    default:
+      drop1:
+        command: "give %player% iron_ingot 20"
+        chance: 0.5
+        message: "&aFourth place! Enjoy your iron!"
+  fifth-place:
+    default:
+      drop1:
+        command: "give %player% coal 32"
+        chance: 0.4
+        message: "&aFifth place! Here are some resources."
+
+  everyone-else-who-contributed:
+    min-damage: 50.0 # Minimum damage required to qualify for rewards
+    default:
+      drop1:
+        command: "give %player% stone 64"
+        chance: 0.5
+        message: "&aThanks for contributing! Here's some stone."
+      drop2:
+        command: "give %player% apple 5"
+        chance: 0.3
+        message: "&cYou got apples as a consolation prize!"
+

@@ -1,0 +1,54 @@
+# In this config is to configure mobs in which you want top 3 damage depending on who made most damage .
+# Make sure you add ThreatTable: true to the mob's MythicMobs config if you Plan to use this section
+# BigScaryBoss:
+#  Type: zombie
+#  Display: '&6Zombie'
+#  Health: 20000
+#  Modules:
+#    ThreatTable: true
+rewardtop3:
+  - SkeletalKnight
+
+SkeletalKnight:
+  guaranteed-rewards: 1 # Limit rewards to 1 from the list
+  use-standard-rewards: false
+  first-place:
+    default:
+      drop1:
+        command: "give %player% diamond 3"
+        chance: 1
+        message: "&b&lFirst Place! You got 3 diamonds from the Skeleton King!"
+    vip:
+      drop1:
+        command: "give %player% diamond 5"
+        chance: 0.9
+        message: "&b&lVIP First Place! You got 5 diamonds from the Skeleton King!"
+  second-place:
+    default:
+      drop1:
+        command: "give %player% diamond 2"
+        chance: 0.6
+        message: "&e&lSecond Place! You got 2 diamonds from the Skeleton King!"
+    vip:
+      drop1:
+        command: "give %player% diamond 3"
+        chance: 0.7
+        message: "&e&lVIP Second Place! You got 3 diamonds from the Skeleton King!"
+  third-place:
+    default:
+      drop1:
+        command: "give %player% diamond 1"
+        chance: 0.5
+        message: "&c&lThird Place! You got 1 diamond from the Skeleton King!"
+    vip:
+      drop1:
+        command: "give %player% diamond 2"
+        chance: 0.6
+        message: "&c&lVIP Third Place! You got 2 diamonds from the Skeleton King!"
+  everyone-else-who-contributed:
+    min-damage: 50.0 # Minimum damage required to qualify for rewards
+    default:
+      drop1:
+        command: "give %player% emerald 1"
+        chance: 0.8
+        message: "&aThanks for contributing! Here's 1 emerald."
