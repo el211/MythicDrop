@@ -169,7 +169,7 @@ public class MythicDrop extends JavaPlugin implements Listener {
         ActiveMob activeMob = MythicBukkit.inst().getMobManager().getActiveMob(event.getEntity().getUniqueId()).orElse(null);
         if (activeMob == null) {
             logDebug("Mob death event triggered, but the entity is not a MythicMob.");
-            return; // Ensure the entity is a MythicMob
+            return;
         }
 
         // Ensure ActiveMob has a valid type and internal name
@@ -182,7 +182,7 @@ public class MythicDrop extends JavaPlugin implements Listener {
         UUID mobId = activeMob.getUniqueId();
         logDebug("Mob death event triggered for mob: " + mobName);
 
-        // Prevent duplicate processing using processedMobEvents
+        // Prevent duplicate processing
         if (processedMobEvents.contains(mobId)) {
             logDebug("Rewards for mob " + mobName + " have already been processed. Skipping.");
             return;
@@ -192,10 +192,16 @@ public class MythicDrop extends JavaPlugin implements Listener {
         // Inspect the threat table
         if (activeMob.hasThreatTable()) {
             logDebug("Threat table size for mob " + mobName + ": " + activeMob.getThreatTable().size());
-            activeMob.getThreatTable().getAllThreatTargets().forEach(target -> {
+
+            for (AbstractEntity target : activeMob.getThreatTable().getAllThreatTargets()) {
+                if (target == null) { // Prevent null entity crash
+                    logDebug("Skipping null entity in threat table.");
+                    continue;
+                }
+
                 double threat = activeMob.getThreatTable().getThreat(target);
                 logDebug(" - Entity: " + target.getName() + ", Threat: " + threat);
-            });
+            }
         } else {
             logDebug("No Threat Table found for mob: " + mobName);
         }
@@ -204,37 +210,35 @@ public class MythicDrop extends JavaPlugin implements Listener {
         if (config.contains(mobName + ".drops")) {
             logDebug("Processing rewards for mob: " + mobName + " using config.yml.");
             handleRewardProcessing(activeMob, event.getKiller() instanceof Player ? (Player) event.getKiller() : null, event);
-            return; // Exit if handled by config.yml
+            return;
         }
 
-        // If the mob is not in config.yml, fallback to Top 3 or Top 5 logic
+        // Check for Top 3 and Top 5 reward configuration
         List<String> rewardTop3Mobs = top3Config.getStringList("rewardtop3");
         List<String> rewardTop5Mobs = top5Config.getStringList("rewardtop5");
 
         boolean isTop3RewardMob = rewardTop3Mobs.contains(mobName);
         boolean isTop5RewardMob = rewardTop5Mobs.contains(mobName);
 
-        // Ensure mutual exclusivity between Top 3 and Top 5 logic
         if (isTop3RewardMob) {
             logDebug("Mob " + mobName + " is configured for Top 3 rewards. Processing Top 3 rewards...");
             handleTop3Rewards(activeMob);
-            return; // Skip further processing
+            return;
         }
 
         if (isTop5RewardMob) {
             logDebug("Mob " + mobName + " is configured for Top 5 rewards. Processing Top 5 rewards...");
             handleTop5Rewards(activeMob);
-            return; // Skip further processing
+            return;
         }
 
-        // If not in rewardTop3 or rewardTop5, fallback to standard reward logic
+        // Fallback to standard reward logic
         logDebug("Mob " + mobName + " is not configured for Top 3 or Top 5 rewards. Falling back to standard reward processing.");
 
         // Determine reward logic based on config
         boolean mostDamage = config.getBoolean("reward-processing.most-damage", false);
         boolean rewardTop3 = config.getBoolean("reward-processing.reward-top3", false);
 
-        // Ensure mutual exclusivity for rewardTop3 and mostDamage
         if (mostDamage && rewardTop3) {
             logDebug("Cannot have both most-damage and reward-top3 enabled simultaneously.");
             return;
@@ -252,7 +256,7 @@ public class MythicDrop extends JavaPlugin implements Listener {
             handleLastHitReward(activeMob, event);
         }
 
-        // Unified announcement logic at the end
+        // Unified announcement logic
         boolean globalAnnounce = announcementConfig.getBoolean("announce-on-death", true);
         boolean specificMobAnnounce = announcementConfig.getBoolean("announce-specific-mob." + mobName, globalAnnounce);
 
@@ -261,13 +265,15 @@ public class MythicDrop extends JavaPlugin implements Listener {
         } else {
             logDebug("Announcements disabled for mob: " + mobName);
 
-            // Additional debug to check if mob is configured for Top 3 or Top 5
+            // Additional debug check if mob is in Top 3 or Top 5
             logDebug("Checking if mob is configured in top3damage.yml: " + top3Config.getStringList("rewardtop3").contains(mobName));
             logDebug("Checking if mob is configured in top5damage.yml: " + top5Config.getStringList("rewardtop5").contains(mobName));
         }
-        processedMobEvents.remove(mobId); // Add this at the end of the method
 
+        // Ensure cleanup at the end
+        processedMobEvents.remove(mobId);
     }
+
 
 
 
@@ -649,7 +655,8 @@ public class MythicDrop extends JavaPlugin implements Listener {
         logDebug("Reward keys available for player group " + primaryGroup + ": " + groupDrops.getKeys(false));
 
         // Get the guaranteed-rewards value, defaulting to 1 if not set
-        int guaranteedRewards = rankSection.getInt("guaranteed-rewards", 1);
+        int guaranteedRewards = rankSection.contains("guaranteed-rewards") ? rankSection.getInt("guaranteed-rewards") : 1;
+        logDebug("DEBUG CHECK: guaranteed-rewards for " + mobName + " at rank " + rank + " = " + guaranteedRewards);
         logDebug("Guaranteed rewards for top-5 rank " + rank + ": " + guaranteedRewards);
 
         // Collect potential rewards
@@ -809,7 +816,7 @@ public class MythicDrop extends JavaPlugin implements Listener {
         logDebug("Available reward keys for group: " + groupDrops.getKeys(false));
 
         // Get the guaranteed-rewards value, defaulting to 1 if not set
-        int guaranteedRewards = rankSection.getInt("guaranteed-rewards", 1);
+        int guaranteedRewards = top3Config.getInt(mobName + ".guaranteed-rewards", 1);
         logDebug("Guaranteed rewards for top-3 rank " + rank + ": " + guaranteedRewards);
 
         // Collect potential rewards
@@ -903,6 +910,7 @@ public class MythicDrop extends JavaPlugin implements Listener {
         String mobName = activeMob.getType().getInternalName();
         logDebug("Starting reward processing for mob: " + mobName + ", player: " + player.getName() + ", position: " + position);
 
+        // Check if the mob has drop configuration in config.yml
         if (!config.contains(mobName + ".drops")) {
             logDebug("No drop configuration found for mob: " + mobName + " in config.yml.");
             return;
@@ -914,6 +922,7 @@ public class MythicDrop extends JavaPlugin implements Listener {
             return;
         }
 
+        // Get the player's primary group for group-specific drops
         String primaryGroup = getPrimaryGroup(player);
         logDebug("Player " + player.getName() + " belongs to primary group: " + primaryGroup);
 
@@ -931,37 +940,70 @@ public class MythicDrop extends JavaPlugin implements Listener {
         // Get the guaranteed-rewards value, defaulting to 1 if not set
         int guaranteedRewards = mobDrops.getInt("guaranteed-rewards", 1);
 
-        // Collect potential rewards
+        // Collect all potential reward keys
         List<String> rewardKeys = new ArrayList<>(groupDrops.getKeys(false));
-        List<String> selectedRewards = new ArrayList<>();
 
-        // Randomly pick up to guaranteedRewards drops
+        // Ensure we don't exceed the number of available reward keys
+        if (rewardKeys.size() < guaranteedRewards) {
+            logDebug("Not enough reward keys available for guaranteed-rewards: " + guaranteedRewards);
+            guaranteedRewards = rewardKeys.size();
+        }
+
+        // Randomly shuffle the list of reward keys
         Collections.shuffle(rewardKeys);
-        for (String dropKey : rewardKeys) {
-            if (selectedRewards.size() >= guaranteedRewards) break;
 
-            double chance = groupDrops.getDouble(dropKey + ".chance", 0.0);
+        // Guarantee rewards without chance rolls
+        logDebug("Guaranteeing " + guaranteedRewards + " rewards for player: " + player.getName());
+        for (int i = 0; i < guaranteedRewards; i++) {
+            String dropKey = rewardKeys.get(i);
             String command = groupDrops.getString(dropKey + ".command");
             String message = groupDrops.getString(dropKey + ".message");
 
-            logDebug("Processing reward " + dropKey + " | Chance: " + chance);
+            if (command != null && !command.isEmpty()) {
+                // Execute the guaranteed reward
+                boolean commandSuccess = Bukkit.dispatchCommand(
+                        Bukkit.getConsoleSender(),
+                        command.replace("%player%", player.getName())
+                );
+                logDebug("Executed guaranteed reward command for " + dropKey + ": " + command + ", Success: " + commandSuccess);
 
-            if (command == null || command.isEmpty()) {
+                // Send reward message if specified
+                if (message != null && !message.isEmpty()) {
+                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+                    logDebug("Sent reward message to player: " + message);
+                }
+            } else {
+                logDebug("Invalid or missing command for guaranteed reward: " + dropKey + ". Skipping.");
+            }
+        }
+
+        // Process remaining rewards based on chance
+        logDebug("Processing chance-based rewards for player: " + player.getName());
+        for (String dropKey : rewardKeys.subList(guaranteedRewards, rewardKeys.size())) {
+            double chance = groupDrops.getDouble(dropKey + ".chance", 0.0); // Default chance is 0
+            String command = groupDrops.getString(dropKey + ".command");
+            String message = groupDrops.getString(dropKey + ".message");
+
+            logDebug("Processing chance-based reward " + dropKey + " | Chance: " + chance);
+
+            if (command == null || command.trim().isEmpty()) {
                 logDebug("Invalid or missing command for reward: " + dropKey + ". Skipping.");
                 continue;
             }
 
+            // Roll the chance for this reward
             double roll = ThreadLocalRandom.current().nextDouble();
             logDebug("Reward " + dropKey + ": Roll=" + roll + " | Threshold=" + chance);
 
             if (roll <= chance) {
-                selectedRewards.add(dropKey);
+                // Execute the reward command
+                boolean commandSuccess = Bukkit.dispatchCommand(
+                        Bukkit.getConsoleSender(),
+                        command.replace("%player%", player.getName())
+                );
+                logDebug("Executed chance-based reward command for " + dropKey + ": " + command.replace("%player%", player.getName()) + ", Success: " + commandSuccess);
 
-                // Execute the command
-                boolean commandSuccess = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", player.getName()));
-                logDebug("Executed reward command for " + dropKey + ": " + command.replace("%player%", player.getName()) + ", Success: " + commandSuccess);
-
-                // Send the message
+                // Send reward message to the player if configured
                 if (message != null && !message.isEmpty()) {
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
                     logDebug("Sent reward message to player: " + message);
@@ -974,7 +1016,6 @@ public class MythicDrop extends JavaPlugin implements Listener {
         long duration = System.currentTimeMillis() - startTime;
         logDebug("Finished reward processing for mob: " + mobName + ", player: " + player.getName() + ", position: " + position + " in " + duration + " ms.");
     }
-
 
 
     /**
